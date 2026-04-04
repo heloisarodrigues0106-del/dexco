@@ -258,9 +258,9 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
             <CardTitle className="text-base font-bold text-slate-800">Mapa de Processos Ativos por UF</CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row gap-4 items-start">
+            <div className="flex items-center justify-center">
               {/* SVG Map */}
-              <div className="flex-1 min-h-[380px] flex items-center justify-center bg-slate-50/50 rounded-lg p-2">
+              <div className="w-full max-w-[500px] flex items-center justify-center bg-slate-50/50 rounded-lg p-2">
                 <svg 
                   viewBox="20 30 370 390" 
                   className="w-full h-auto max-h-[380px]"
@@ -299,44 +299,6 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
                     );
                   })}
                 </svg>
-              </div>
-
-              {/* Info Panel */}
-              <div className="w-full md:w-[200px] flex-shrink-0">
-                {activeUF && activeUFData ? (
-                  <div className="border border-slate-200 rounded-lg p-4 bg-white shadow-sm space-y-3">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-orange-500" />
-                      <span className="font-black text-lg text-slate-900">{activeUF}</span>
-                    </div>
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-slate-500 font-medium">Processos:</span>
-                        <span className="text-sm font-black" style={{ color: ROYAL_BLUE }}>{activeUFData.count}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-slate-500 font-medium">Valor Total:</span>
-                        <span className="text-xs font-bold text-orange-600">{formatCurrency(activeUFData.valor)}</span>
-                      </div>
-                    </div>
-                    {activeComarcas.length > 0 && (
-                      <div className="border-t pt-2 space-y-1">
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Por Comarca</p>
-                        {activeComarcas.map(([comarca, count]) => (
-                          <div key={comarca} className="flex justify-between items-center">
-                            <span className="text-[10px] font-semibold text-slate-600 uppercase truncate max-w-[120px]">{comarca}</span>
-                            <span className="text-xs font-black text-slate-700">{count}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="border border-dashed border-slate-200 rounded-lg p-4 text-center">
-                    <MapPin className="h-5 w-5 text-slate-300 mx-auto mb-2" />
-                    <p className="text-xs text-slate-400 font-medium">Passe o mouse sobre um estado ou clique para ver detalhes</p>
-                  </div>
-                )}
               </div>
             </div>
           </CardContent>
