@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import { KPICards } from "@/components/dashboard/kpi-cards"
 import { DataTables } from "@/components/dashboard/data-tables"
 import { AcordosTab } from "@/components/dashboard/tabs/acordos-tab"
+import { ProcessosTab } from "@/components/dashboard/tabs/processos-tab"
 
 interface DashboardClientProps {
   processos: Processo[];
@@ -25,6 +26,13 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
   const handleLogout = useCallback(async () => {
     router.push("/")
   }, [router])
+
+  const getPageTitle = (id: string) => {
+    if (id === "dashboard") return "Visão Geral";
+    if (id === "acordos") return "Acordos";
+    if (id === "processos") return "Processos";
+    return id;
+  }
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
@@ -59,7 +67,7 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
               </svg>
             </button>
             <h1 className="text-xl font-black tracking-widest uppercase">
-              {activeNavItem === "dashboard" ? "Visão Geral" : "Acordos"} // DEXCO
+              {getPageTitle(activeNavItem)} // DEXCO
             </h1>
           </div>
           
@@ -95,6 +103,10 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
 
           {activeNavItem === "acordos" && (
             <AcordosTab acordos={acordos} />
+          )}
+
+          {activeNavItem === "processos" && (
+            <ProcessosTab processos={processos} />
           )}
 
         </div>

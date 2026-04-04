@@ -1,340 +1,277 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { Processo } from "@/lib/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { ProcessesTable } from "@/components/dashboard/processes-table"
-import { MapeamentoTestemunhas } from "./mapeamento-testemunhas"
-import { Check, X, Search } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ChevronLeft, ChevronRight, Eye, Scale, MapPin, Briefcase, Landmark, User, DollarSign, Activity } from "lucide-react"
 
-const PEDIDO_KEYS = [
-  { key: "reintegracao", label: "Reintegração" },
-  { key: "periculosidade", label: "Periculosidade" },
-  { key: "insalubridade", label: "Insalubridade" },
-  { key: "danos_morais", label: "Danos Morais" },
-  { key: "horas_extras", label: "Horas Extras" },
-  { key: "intrajornada", label: "Intrajornada" },
-  { key: "horas_itinere", label: "Horas in Itinere" },
-  { key: "acumulo_funcao", label: "Acúmulo de Função" },
-  { key: "equip_salarial", label: "Equiparação Salarial" },
-  { key: "rec_vinculo", label: "Vínculo Empregatício" },
-  { key: "rescisao_indireta", label: "Rescisão Indireta" },
-  { key: "danos_materiais", label: "Danos Materiais" },
-  { key: "honorarios_advocaticios", label: "Honorários Advocatícios" },
-]
-
-function BoolIcon({ value }: { value: boolean | null | undefined }) {
-  if (value === true) return <Check className="h-4 w-4 text-emerald-500 mx-auto" strokeWidth={3} />
-  if (value === false) return <X className="h-4 w-4 text-red-400 mx-auto" strokeWidth={3} />
-  return <span className="text-slate-300 text-xs block text-center">—</span>
+interface ProcessosTabProps {
+  processos: Processo[];
 }
 
-export function ProcessosTab({ 
-  processos, 
-  pedidosInicial, 
-  pedidosSentenca, 
-  pedidosAcordao,
-  laudos = []
-}: { 
-  processos: any[], 
-  pedidosInicial: any[], 
-  pedidosSentenca: any[], 
-  pedidosAcordao: any[],
-  laudos?: any[]
-}) {
-  const [selectedPedido, setSelectedPedido] = useState<{ key: string, label: string } | null>(null)
+export function ProcessosTab({ processos }: ProcessosTabProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
+  const [selectedProcesso, setSelectedProcesso] = useState<Processo | null>(null);
 
-  // Index pedidos by numero_processo for fast lookup
-  const pedidosInicialMap = useMemo(() => {
-    const map: Record<string, any> = {}
-    pedidosInicial.forEach(p => { if (p.numero_processo) map[String(p.numero_processo)] = p })
-    return map
-  }, [pedidosInicial])
+  const totalPages = Math.max(1, Math.ceil(processos.length / itemsPerPage));
 
-  const pedidosSentencaMap = useMemo(() => {
-    const map: Record<string, any> = {}
-    pedidosSentenca.forEach(p => { if (p.numero_processo) map[String(p.numero_processo)] = p })
-    return map
-  }, [pedidosSentenca])
+  const currentProcessos = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return processos.slice(startIndex, startIndex + itemsPerPage);
+  }, [processos, currentPage]);
 
-  const pedidosAcordaoMap = useMemo(() => {
-    const map: Record<string, any> = {}
-    pedidosAcordao.forEach(p => { if (p.numero_processo) map[String(p.numero_processo)] = p })
-    return map
-  }, [pedidosAcordao])
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(p => p + 1);
+  };
 
-  // Aggregate data for the matrix table
-  const matrixData = useMemo(() => {
-    return PEDIDO_KEYS.map((pedido) => {
-      let inicialTrue = 0, inicialFalse = 0
-      let sentencaTrue = 0, sentencaFalse = 0
-      let acordaoTrue = 0, acordaoFalse = 0
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(p => p - 1);
+  };
 
-      pedidosInicial.forEach((row) => {
-        if (row[pedido.key] === true) inicialTrue++
-        else if (row[pedido.key] === false) inicialFalse++
-      })
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+  };
 
-      pedidosSentenca.forEach((row) => {
-        if (row[pedido.key] === true) sentencaTrue++
-        else if (row[pedido.key] === false) sentencaFalse++
-      })
+  // Cor Azul Royal da Martinelli
+  const ROYAL_BLUE = "#0F2A60";
 
-      pedidosAcordao.forEach((row) => {
-        if (row[pedido.key] === true) acordaoTrue++
-        else if (row[pedido.key] === false) acordaoFalse++
-      })
-
-      const inicialTotal = inicialTrue + inicialFalse
-      const sentencaTotal = sentencaTrue + sentencaFalse
-      const acordaoTotal = acordaoTrue + acordaoFalse
-
-      return {
-        key: pedido.key,
-        name: pedido.label,
-        inicial: { deferido: inicialTrue, indeferido: inicialFalse, total: inicialTotal },
-        sentenca: { deferido: sentencaTrue, indeferido: sentencaFalse, total: sentencaTotal },
-        acordao: { deferido: acordaoTrue, indeferido: acordaoFalse, total: acordaoTotal },
-        totalPedidos: inicialTotal,
-      }
-    })
-    .filter(item => item.totalPedidos > 0)
-    .sort((a, b) => b.totalPedidos - a.totalPedidos)
-  }, [pedidosInicial, pedidosSentenca, pedidosAcordao])
-
-  // Per-process detail for the selected pedido
-  const detailRows = useMemo(() => {
-    if (!selectedPedido) return []
+  // Gera array de páginas para a paginação
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
     
-    return processos.map(p => {
-      const numProc = String(p.numero_processo)
-      const ini = pedidosInicialMap[numProc]
-      const sen = pedidosSentencaMap[numProc]
-      const aco = pedidosAcordaoMap[numProc]
-
-      const inicialVal = ini ? ini[selectedPedido.key] : undefined
-      const sentencaVal = sen ? sen[selectedPedido.key] : undefined
-      const acordaoVal = aco ? aco[selectedPedido.key] : undefined
-
-      const hasData = inicialVal !== undefined || sentencaVal !== undefined || acordaoVal !== undefined
-
-      return {
-        numero: numProc,
-        reclamante: p.nome_reclamante || "—",
-        status: p.status || "—",
-        inicial: inicialVal ?? null,
-        sentenca: sentencaVal ?? null,
-        acordao: acordaoVal ?? null,
-        hasData,
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      let start = Math.max(1, currentPage - 2);
+      let end = Math.min(totalPages, start + maxVisiblePages - 1);
+      
+      if (end - start < maxVisiblePages - 1) {
+        start = Math.max(1, end - maxVisiblePages + 1);
       }
-    }).filter(r => r.hasData)
-  }, [selectedPedido, processos, pedidosInicialMap, pedidosSentencaMap, pedidosAcordaoMap])
-
-  const renderCell = (data: { deferido: number, indeferido: number, total: number }) => {
-    if (data.total === 0) {
-      return <span className="text-slate-300 text-xs">—</span>
+      
+      for (let i = start; i <= end; i++) pages.push(i);
     }
-    const rate = data.total > 0 ? (data.deferido / data.total * 100).toFixed(0) : "0"
-    const isDeferido = data.deferido > data.indeferido
-    return (
-      <div className="flex flex-col items-center gap-0.5">
-        {isDeferido ? (
-          <Check className="h-5 w-5 text-emerald-500" strokeWidth={3} />
-        ) : (
-          <X className="h-5 w-5 text-red-400" strokeWidth={3} />
-        )}
-        <span className={`text-[10px] font-semibold ${isDeferido ? 'text-emerald-600' : 'text-red-400'}`}>
-          {data.deferido}/{data.total}
-        </span>
-        <span className="text-[9px] text-slate-400">
-          ({rate}%)
-        </span>
-      </div>
-    )
-  }
+    return pages;
+  };
 
   return (
     <div className="space-y-6">
-      {/* Matrix Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Análise de Pedidos — Matriz de Deferimento <Badge variant="secondary" className="font-normal bg-amber-100 text-amber-700 hover:bg-amber-100">Inicial → Sentença → Acórdão</Badge>
+      <Card className="rounded-xl shadow-sm border-2 overflow-hidden">
+        <CardHeader className="border-b bg-slate-50/50 pb-4">
+          <CardTitle className="text-xl font-bold text-slate-800">
+            Detalhamento dos Processos
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Visualização do resultado de cada pedido ao longo das fases processuais. Clique em <Search className="inline h-3.5 w-3.5" /> para ver o detalhe por processo.
-          </p>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-[#111111] text-white">
-                  <th className="text-left px-4 py-3 font-semibold min-w-[200px] border-r border-slate-700">Pedido</th>
-                  <th className="text-center px-4 py-3 font-semibold border-r border-slate-700 min-w-[120px]">
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span>Inicial</span>
-                      <span className="text-[10px] text-slate-400 font-normal">Pleiteado</span>
-                    </div>
-                  </th>
-                  <th className="text-center px-4 py-3 font-semibold border-r border-slate-700 min-w-[120px]">
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span>Sentença</span>
-                      <span className="text-[10px] text-slate-400 font-normal">Deferido?</span>
-                    </div>
-                  </th>
-                  <th className="text-center px-4 py-3 font-semibold border-r border-slate-700 min-w-[120px]">
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span>Acórdão</span>
-                      <span className="text-[10px] text-slate-400 font-normal">Deferido?</span>
-                    </div>
-                  </th>
-                  <th className="text-center px-3 py-3 font-semibold w-[60px]">
-                    <span className="text-[10px] text-slate-400 font-normal">Detalhe</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {matrixData.map((row, idx) => (
-                  <tr 
-                    key={idx} 
-                    className={`border-b border-border transition-colors hover:bg-amber-50/50 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}
-                  >
-                    <td className="px-4 py-3 font-medium text-slate-800 border-r border-border">
-                      <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-6 rounded-full bg-[#F6D000] shrink-0"></span>
-                        {row.name}
-                      </div>
+        <div className="overflow-x-auto p-0">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-slate-50 border-b border-border">
+              <tr>
+                <th className="px-6 py-4 font-bold text-slate-800 text-xs uppercase tracking-wider">Número do Processo</th>
+                <th className="px-6 py-4 font-bold text-slate-800 text-xs uppercase tracking-wider">Reclamante</th>
+                <th className="px-6 py-4 font-bold text-slate-800 text-xs uppercase tracking-wider">TRT/Comarca</th>
+                <th className="px-6 py-4 font-bold text-slate-800 text-xs uppercase tracking-wider">Fase Atual</th>
+                <th className="px-6 py-4 font-bold text-slate-800 text-xs uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 font-bold text-slate-800 text-xs uppercase tracking-wider text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {currentProcessos.map((p) => {
+                const statusName = (p.status || p.status_processo || p.fase_processo || "EM ANDAMENTO").toUpperCase();
+                let badgeColor = "bg-slate-100 text-slate-700";
+                
+                if (statusName.includes("PROCEDENTE")) badgeColor = "bg-[#F6D000] text-black font-bold border-[#d97706]/30";
+                else if (statusName.includes("ARQUIVADO")) badgeColor = "bg-[#fcd34d] text-amber-900 font-bold border-[#d97706]/30";
+                else if (statusName.includes("IMPROCEDENTE")) badgeColor = "bg-red-100 text-red-700 font-bold";
+
+                return (
+                  <tr key={p.numero_processo} className="hover:bg-slate-50 transition-colors group">
+                    <td className="px-6 py-4 font-mono text-xs text-slate-600 font-medium">{p.numero_processo}</td>
+                    <td className="px-6 py-4 text-slate-800 text-xs font-semibold">{p.nome_reclamante}</td>
+                    <td className="px-6 py-4 text-slate-500 uppercase text-xs">/ {p.comarca}</td>
+                    <td className="px-6 py-4 text-slate-500 uppercase text-xs">
+                      {p.fase_processual || p.fase_processo || "CONHECIMENTO"}
                     </td>
-                    <td className="px-4 py-3 text-center border-r border-border">
-                      {renderCell(row.inicial)}
+                    <td className="px-6 py-4">
+                      <Badge variant="outline" className={`px-2 py-0.5 text-[10px] rounded-full ${badgeColor}`}>
+                        {statusName}
+                      </Badge>
                     </td>
-                    <td className="px-4 py-3 text-center border-r border-border">
-                      {renderCell(row.sentenca)}
-                    </td>
-                    <td className="px-4 py-3 text-center border-r border-border">
-                      {renderCell(row.acordao)}
-                    </td>
-                    <td className="px-3 py-3 text-center">
-                      <button
-                        onClick={() => setSelectedPedido({ key: row.key, label: row.name })}
-                        className="p-1.5 rounded-md bg-amber-50 hover:bg-[#F6D000] text-slate-600 hover:text-[#111111] transition-all duration-200 hover:shadow-sm"
-                        title={`Ver detalhe de "${row.name}" por processo`}
+                    <td className="px-6 py-4 text-right">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setSelectedProcesso(p)}
+                        className="font-bold flex items-center justify-end w-full group-hover:bg-[#f8fafc] transition-colors"
+                        style={{ color: ROYAL_BLUE }}
                       >
-                        <Search className="h-4 w-4" />
-                      </button>
+                        <Eye className="h-4 w-4 mr-1.5" />
+                        Ver detalhes
+                      </Button>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                )
+              })}
+              {currentProcessos.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground font-medium">Nenhum processo encontrado.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Paginação Estilo Design System */}
+        {totalPages > 0 && (
+          <div className="border-t border-border p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-slate-500 font-medium">
+              {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, processos.length)} de {processos.length}
+            </p>
+            <div className="flex items-center gap-1.5 overflow-x-auto">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handlePrevPage} 
+                disabled={currentPage === 1}
+                className="h-8 rounded-md text-slate-500 font-medium"
+              >
+                <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Anterior
+              </Button>
+              
+              {getPageNumbers().map(num => (
+                <Button
+                  key={num}
+                  variant={num === currentPage ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(num)}
+                  className={`h-8 w-8 p-0 rounded-md font-bold transition-colors ${
+                    num === currentPage 
+                      ? "text-white" 
+                      : "text-slate-600 bg-white"
+                  }`}
+                  style={num === currentPage ? { backgroundColor: ROYAL_BLUE, borderColor: ROYAL_BLUE } : {}}
+                >
+                  {num}
+                </Button>
+              ))}
+
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleNextPage} 
+                disabled={currentPage === totalPages}
+                className="h-8 rounded-md text-slate-500 font-medium"
+              >
+                Próximo <ChevronRight className="h-3.5 w-3.5 ml-1" />
+              </Button>
+            </div>
           </div>
-        </CardContent>
+        )}
       </Card>
 
-      {/* Per-Process Detail Dialog */}
-      <Dialog open={!!selectedPedido} onOpenChange={(open) => { if (!open) setSelectedPedido(null) }}>
-        <DialogContent className="sm:max-w-[95vw] sm:w-[95vw] w-[98vw] max-h-[95vh] overflow-hidden bg-white p-0 !max-w-none">
-          <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100 bg-slate-50/50">
-            <DialogTitle className="text-xl font-bold text-slate-900 flex items-center gap-3">
-              <span className="w-2 h-8 rounded-full bg-[#F6D000] shrink-0"></span>
-              {selectedPedido?.label}
-              <Badge className="bg-amber-100 text-amber-700 font-normal hover:bg-amber-100">
-                {detailRows.length} processo(s)
-              </Badge>
-            </DialogTitle>
-            <p className="text-sm text-slate-500 mt-1">
-              Movimentação do pedido por processo individual — da Inicial ao Acórdão
-            </p>
-          </DialogHeader>
+      {/* Modal de Detalhes do Processo */}
+      <Dialog open={!!selectedProcesso} onOpenChange={(open) => !open && setSelectedProcesso(null)}>
+        <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden border-2">
+          {selectedProcesso && (
+            <>
+              <DialogHeader className="p-6 pb-0 border-b border-border bg-slate-50">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-primary/10" style={{ color: ROYAL_BLUE }}>
+                    <Scale className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <DialogTitle className="text-xl font-bold" style={{ color: ROYAL_BLUE }}>
+                      Detalhamento do Processo
+                    </DialogTitle>
+                    <p className="text-sm font-mono text-muted-foreground mt-0.5">{selectedProcesso.numero_processo}</p>
+                  </div>
+                </div>
+              </DialogHeader>
+              
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white overflow-y-auto max-h-[70vh]">
+                
+                {/* Info Block 1 */}
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      <User className="h-3.5 w-3.5" /> Reclamante
+                    </div>
+                    <p className="text-sm font-bold text-slate-800">{selectedProcesso.nome_reclamante}</p>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      <Briefcase className="h-3.5 w-3.5" /> Advogado do Reclamante
+                    </div>
+                    <p className="text-sm font-medium text-slate-700">{selectedProcesso.advogado_reclamante || "Não informado"}</p>
+                  </div>
 
-          <ScrollArea className="max-h-[65vh]">
-            <div className="px-6 py-4">
-              <div className="overflow-x-auto rounded-lg border border-border bg-white">
-                <table className="w-full text-sm table-auto border-collapse">
-                  <thead className="sticky top-0 z-10">
-                    <tr className="bg-[#111111] text-white">
-                      <th className="text-left px-4 py-3 font-semibold min-w-[180px] border-r border-slate-700">Nº Processo</th>
-                      <th className="text-left px-4 py-3 font-semibold min-w-[250px] border-r border-slate-700">Reclamante</th>
-                      <th className="text-center px-2 py-3 font-semibold border-r border-slate-700 w-[110px]">Inicial</th>
-                      <th className="text-center px-2 py-3 font-semibold border-r border-slate-700 w-[110px]">Sentença</th>
-                      <th className="text-center px-2 py-3 font-semibold w-[110px]">Acórdão</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {detailRows.map((row, idx) => (
-                      <tr 
-                        key={idx} 
-                        className={`border-b border-border transition-colors hover:bg-amber-50/30 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-100/20'}`}
-                      >
-                        <td className="px-4 py-2.5 font-mono text-[11px] text-slate-700 border-r border-border truncate">
-                          {row.numero}
-                        </td>
-                        <td className="px-4 py-2.5 text-slate-700 text-xs font-medium truncate border-r border-border" title={row.reclamante}>
-                          {row.reclamante}
-                        </td>
-                        <td className="px-4 py-2.5 border-r border-border">
-                          <BoolIcon value={row.inicial} />
-                        </td>
-                        <td className="px-4 py-2.5 border-r border-border">
-                          <BoolIcon value={row.sentenca} />
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <BoolIcon value={row.acordao} />
-                        </td>
-                      </tr>
-                    ))}
-                    {detailRows.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="px-4 py-8 text-center text-slate-400">
-                          Nenhum processo encontrado para este pedido.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </ScrollArea>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      <Landmark className="h-3.5 w-3.5" /> Comarca / Vara
+                    </div>
+                    <p className="text-sm font-medium text-slate-700 uppercase">{selectedProcesso.comarca} - {selectedProcesso.vara} ({selectedProcesso.UF})</p>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      <Activity className="h-3.5 w-3.5" /> Fase Processual
+                    </div>
+                    <p className="text-sm font-medium text-slate-700 uppercase">{selectedProcesso.fase_processual || selectedProcesso.fase_processo || "Não informada"}</p>
+                  </div>
+                </div>
 
-          {/* Summary Footer */}
-          {detailRows.length > 0 && (
-            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex flex-wrap gap-6 text-xs">
-              <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-emerald-500" strokeWidth={3} />
-                <span className="text-slate-600">
-                  Inicial: <strong className="text-emerald-600">{detailRows.filter(r => r.inicial === true).length}</strong> deferidos
-                </span>
+                {/* Info Block 2 */}
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      <MapPin className="h-3.5 w-3.5" /> Unidade Organizacional
+                    </div>
+                    <p className="text-sm font-medium text-slate-700 uppercase">{selectedProcesso.unidade_organizacional || "Dexco Matriz"}</p>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      <DollarSign className="h-3.5 w-3.5" /> Valor da Causa
+                    </div>
+                    <p className="text-lg font-black text-slate-800">{formatCurrency(selectedProcesso.valor_causa)}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      <DollarSign className="h-3.5 w-3.5" /> Provisionamento (Risco)
+                    </div>
+                    <p className="text-sm font-bold text-orange-600 bg-orange-50 inline-block px-2 py-0.5 rounded border border-orange-100">
+                      {selectedProcesso.provisionamento ? selectedProcesso.provisionamento : "Risco Não Avaliado ou Risco Possível"}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1 pt-2">
+                     <Badge className="bg-[#1e293b] text-white hover:bg-[#334155] border-transparent font-medium py-1 px-3">
+                       Status: {(selectedProcesso.status || selectedProcesso.status_processo || selectedProcesso.fase_processo || "Ativo").toUpperCase()}
+                     </Badge>
+                  </div>
+                </div>
+
               </div>
-              <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-emerald-500" strokeWidth={3} />
-                <span className="text-slate-600">
-                  Sentença: <strong className="text-emerald-600">{detailRows.filter(r => r.sentenca === true).length}</strong> deferidos
-                </span>
+              <div className="bg-slate-50 p-4 border-t flex justify-end">
+                <Button 
+                  variant="default" 
+                  onClick={() => setSelectedProcesso(null)}
+                  style={{ backgroundColor: ROYAL_BLUE }}
+                  className="font-bold text-white hover:opacity-90 transition-opacity"
+                >
+                  Fechar
+                </Button>
               </div>
-              <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-emerald-500" strokeWidth={3} />
-                <span className="text-slate-600">
-                  Acórdão: <strong className="text-emerald-600">{detailRows.filter(r => r.acordao === true).length}</strong> deferidos
-                </span>
-              </div>
-            </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Tabela de Processos */}
-      <ProcessesTable processos={processos} laudos={laudos} />
-
-      {/* Seção Mapeamento de Testemunhas */}
-      <MapeamentoTestemunhas processos={processos} />
     </div>
   )
 }
