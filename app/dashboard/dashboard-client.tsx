@@ -11,6 +11,7 @@ import { Menu, Bell, Search } from "lucide-react"
 import { AcordosTab } from "@/components/dashboard/tabs/acordos-tab"
 import { ProcessosTab } from "@/components/dashboard/tabs/processos-tab"
 import { VisaoGeralTab } from "@/components/dashboard/tabs/visao-geral-tab"
+import { createClient } from "@/lib/supabase-client"
 
 interface DashboardClientProps {
   processos: Processo[];
@@ -24,7 +25,10 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const handleLogout = useCallback(async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
     router.push("/")
+    router.refresh()
   }, [router])
 
   const getPageTitle = (id: string) => {
