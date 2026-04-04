@@ -87,9 +87,10 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
               <Image
                 src="/dexco-logo.svg"
                 alt="Dexco"
-                width={120}
-                height={120}
-                className="h-12 w-auto opacity-80"
+                width={200}
+                height={200}
+                className="w-32 h-auto opacity-90 scale-[1.8]"
+                priority
               />
             </div>
 
