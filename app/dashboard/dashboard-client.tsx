@@ -7,10 +7,9 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { Processo, Acordo } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
-import { KPICards } from "@/components/dashboard/kpi-cards"
-import { DataTables } from "@/components/dashboard/data-tables"
 import { AcordosTab } from "@/components/dashboard/tabs/acordos-tab"
 import { ProcessosTab } from "@/components/dashboard/tabs/processos-tab"
+import { VisaoGeralTab } from "@/components/dashboard/tabs/visao-geral-tab"
 
 interface DashboardClientProps {
   processos: Processo[];
@@ -37,7 +36,6 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       
-      {/* Sidebar - Mantida a estrutura para navegação, mas com foco único */}
       <SidebarNav 
         activeItem={activeNavItem} 
         onItemClick={setActiveNavItem} 
@@ -48,14 +46,12 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
         onLogout={handleLogout}
       />
 
-      {/* Main Content */}
       <main className={cn(
         "flex-1 transition-all duration-500 max-w-7xl mx-auto",
         isCollapsed ? "md:ml-20" : "md:ml-64",
         "ml-0"
       )}>
         
-        {/* Header minimalistic */}
         <div className="sticky top-0 z-30 flex h-20 w-full items-center justify-between border-b border-border bg-background/90 px-6 backdrop-blur-md">
           <div className="flex items-center gap-4">
             <button 
@@ -78,27 +74,10 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
           </div>
         </div>
 
-        {/* Content Context */}
-        <div className="p-6 md:p-10 space-y-12 animate-in fade-in duration-500">
+        <div className="p-6 md:p-10 space-y-8 animate-in fade-in duration-500">
           
           {activeNavItem === "dashboard" && (
-            <>
-              {/* Hero Section of Dashboard */}
-              <section className="space-y-4">
-                <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">
-                  Gestão de <br className="hidden md:block"/>Contencioso
-                </h2>
-                <p className="max-w-xl text-muted-foreground font-mono text-xs uppercase tracking-widest border-l-2 border-primary pl-4">
-                  Monitoramento em tempo real do volume processual e acordos realizados. Dados centralizados e consolidados.
-                </p>
-              </section>
-
-              {/* Brutalist KPI Cards Component */}
-              <KPICards processos={processos} />
-
-              {/* Data Tables Component */}
-              <DataTables processos={processos} />
-            </>
+            <VisaoGeralTab processos={processos} />
           )}
 
           {activeNavItem === "acordos" && (
