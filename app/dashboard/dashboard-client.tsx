@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 
 import { KPICards } from "@/components/dashboard/kpi-cards"
 import { DataTables } from "@/components/dashboard/data-tables"
+import { AcordosTab } from "@/components/dashboard/tabs/acordos-tab"
 
 interface DashboardClientProps {
   processos: Processo[];
@@ -57,7 +58,9 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
                 <path d="M1.5 3C1.22386 3 1 3.22386 1 3.5C1 3.77614 1.22386 4 1.5 4H13.5C13.7761 4 14 3.77614 14 3.5C14 3.22386 13.7761 3 13.5 3H1.5ZM1 7.5C1 7.22386 1.22386 7 1.5 7H13.5C13.7761 7 14 7.22386 14 7.5C14 7.77614 13.7761 8 13.5 8H1.5C1.22386 8 1 7.77614 1 7.5ZM1 11.5C1 11.2239 1.22386 11 1.5 11H13.5C13.7761 11 14 11.2239 14 11.5C14 11.7761 13.7761 12 13.5 12H1.5C1.22386 12 1 11.7761 1 11.5Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
               </svg>
             </button>
-            <h1 className="text-xl font-black tracking-widest uppercase">Visão Geral // DEXCO</h1>
+            <h1 className="text-xl font-black tracking-widest uppercase">
+              {activeNavItem === "dashboard" ? "Visão Geral" : "Acordos"} // DEXCO
+            </h1>
           </div>
           
           <div className="flex items-center gap-4">
@@ -68,23 +71,31 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
         </div>
 
         {/* Content Context */}
-        <div className="p-6 md:p-10 space-y-12">
+        <div className="p-6 md:p-10 space-y-12 animate-in fade-in duration-500">
           
-          {/* Hero Section of Dashboard */}
-          <section className="space-y-4">
-            <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">
-              Gestão de <br className="hidden md:block"/>Contencioso
-            </h2>
-            <p className="max-w-xl text-muted-foreground font-mono text-xs uppercase tracking-widest border-l-2 border-primary pl-4">
-              Monitoramento em tempo real do volume processual e acordos realizados. Dados centralizados e consolidados.
-            </p>
-          </section>
+          {activeNavItem === "dashboard" && (
+            <>
+              {/* Hero Section of Dashboard */}
+              <section className="space-y-4">
+                <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">
+                  Gestão de <br className="hidden md:block"/>Contencioso
+                </h2>
+                <p className="max-w-xl text-muted-foreground font-mono text-xs uppercase tracking-widest border-l-2 border-primary pl-4">
+                  Monitoramento em tempo real do volume processual e acordos realizados. Dados centralizados e consolidados.
+                </p>
+              </section>
 
-          {/* Brutalist KPI Cards Component */}
-          <KPICards processos={processos} acordos={acordos} />
+              {/* Brutalist KPI Cards Component */}
+              <KPICards processos={processos} />
 
-          {/* Data Tables Component */}
-          <DataTables processos={processos} acordos={acordos} />
+              {/* Data Tables Component */}
+              <DataTables processos={processos} />
+            </>
+          )}
+
+          {activeNavItem === "acordos" && (
+            <AcordosTab acordos={acordos} />
+          )}
 
         </div>
 

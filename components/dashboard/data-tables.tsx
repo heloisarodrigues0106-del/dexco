@@ -1,11 +1,10 @@
-import { Processo, Acordo } from "@/lib/types";
+import { Processo } from "@/lib/types";
 
 interface DataTablesProps {
   processos: Processo[];
-  acordos: Acordo[];
 }
 
-export function DataTables({ processos, acordos }: DataTablesProps) {
+export function DataTables({ processos }: DataTablesProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   };
@@ -54,54 +53,6 @@ export function DataTables({ processos, acordos }: DataTablesProps) {
                 </tr>
               ))}
               {processos.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground uppercase font-bold tracking-widest text-xs">
-                    Nenhum registro encontrado
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Acordos Table */}
-      <section className="animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="h-8 w-2 bg-success"></div>
-          <h2 className="text-2xl font-black uppercase tracking-tighter">Histórico de Acordos</h2>
-        </div>
-        
-        <div className="overflow-x-auto border-2 border-border p-1 bg-card rounded-none">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs uppercase bg-muted/50 border-b-2 border-border">
-              <tr>
-                <th className="px-4 py-4 font-black">Nº Processo</th>
-                <th className="px-4 py-4 font-black">TRT</th>
-                <th className="px-4 py-4 font-black text-right">Valor Causa</th>
-                <th className="px-4 py-4 font-black text-right">Acordo Fechado</th>
-                <th className="px-4 py-4 font-black text-right text-success">Saving Realizado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {acordos.map((a) => (
-                <tr key={`${a.numero_processo}-acordo`} className="hover:bg-muted/20 transition-colors">
-                  <td className="px-4 py-4 font-mono text-xs font-bold text-foreground">{a.numero_processo}</td>
-                  <td className="px-4 py-4 text-muted-foreground">{a.TRT}</td>
-                  <td className="px-4 py-4 font-mono text-right text-muted-foreground line-through opacity-70">
-                    {formatCurrency(a.valor_causa)}
-                  </td>
-                  <td className="px-4 py-4 font-mono text-right font-bold">
-                    {formatCurrency(a.valor_acordo)}
-                  </td>
-                  <td className="px-4 py-4 font-mono text-right text-success font-black p-0">
-                    <div className="bg-success/10 border-l-2 border-success h-full flex items-center justify-end px-4 py-3">
-                      {formatCurrency(a.saving)}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {acordos.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground uppercase font-bold tracking-widest text-xs">
                     Nenhum registro encontrado
