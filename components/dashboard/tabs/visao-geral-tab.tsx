@@ -1,11 +1,11 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { Processo } from "@/lib/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
-import { Scale, Activity, DollarSign, Building2, MapPin } from "lucide-react"
+import { Scale, Activity, DollarSign, Building2 } from "lucide-react"
 
 interface VisaoGeralTabProps {
   processos: Processo[];
@@ -21,49 +21,7 @@ const ROYAL_BLUE_TINT = "#A8C8F0";
 
 const CHART_GRADIENT = [ROYAL_BLUE, ROYAL_BLUE_LIGHT, ROYAL_BLUE_MEDIUM, ROYAL_BLUE_SOFT, ROYAL_BLUE_PALE, ROYAL_BLUE_TINT, "#C5DAEE", "#DDE9F5", "#EDF3FA", "#F6F9FD"];
 
-// SVG paths for Brazilian states
-const BRAZIL_STATES: Record<string, { path: string; label: string; cx: number; cy: number }> = {
-  AC: { path: "M48,168 L48,195 L80,195 L80,175 L65,168 Z", label: "AC", cx: 64, cy: 182 },
-  AM: { path: "M65,100 L145,100 L160,120 L160,165 L80,175 L80,195 L48,195 L48,168 L35,150 L35,120 Z", label: "AM", cx: 98, cy: 145 },
-  RR: { path: "M95,45 L130,45 L145,70 L145,100 L95,100 L80,80 Z", label: "RR", cx: 112, cy: 73 },
-  AP: { path: "M195,50 L220,40 L235,60 L225,90 L200,95 L190,75 Z", label: "AP", cx: 210, cy: 68 },
-  PA: { path: "M145,70 L195,50 L190,75 L200,95 L225,90 L240,105 L255,120 L245,145 L220,155 L195,145 L160,165 L160,120 L145,100 Z", label: "PA", cx: 195, cy: 118 },
-  MA: { path: "M240,105 L255,100 L275,105 L290,120 L280,145 L255,158 L240,150 L245,145 L255,120 Z", label: "MA", cx: 265, cy: 128 },
-  TO: { path: "M220,155 L245,145 L240,150 L255,158 L250,190 L240,215 L215,215 L210,190 Z", label: "TO", cx: 232, cy: 185 },
-  PI: { path: "M275,105 L290,100 L305,115 L300,150 L290,168 L270,170 L258,160 L255,158 L280,145 L290,120 Z", label: "PI", cx: 282, cy: 138 },
-  CE: { path: "M305,100 L325,95 L340,108 L330,125 L315,125 L305,115 Z", label: "CE", cx: 322, cy: 110 },
-  RN: { path: "M340,108 L355,108 L355,122 L340,125 L330,125 Z", label: "RN", cx: 345, cy: 116 },
-  PB: { path: "M330,125 L340,125 L355,122 L358,132 L330,135 Z", label: "PB", cx: 344, cy: 128 },
-  PE: { path: "M290,168 L300,150 L315,145 L330,135 L358,132 L360,145 L340,150 L300,170 Z", label: "PE", cx: 328, cy: 148 },
-  AL: { path: "M340,150 L360,145 L362,158 L345,162 Z", label: "AL", cx: 352, cy: 154 },
-  SE: { path: "M340,162 L345,162 L362,158 L358,172 L342,170 Z", label: "SE", cx: 350, cy: 165 },
-  BA: { path: "M270,170 L290,168 L300,170 L340,150 L340,162 L342,170 L358,172 L350,210 L335,240 L310,260 L280,260 L260,245 L250,220 L240,215 L250,190 Z", label: "BA", cx: 300, cy: 215 },
-  MT: { path: "M130,185 L160,165 L195,145 L220,155 L210,190 L215,215 L200,240 L165,240 L140,225 L130,200 Z", label: "MT", cx: 172, cy: 200 },
-  GO: { path: "M215,215 L240,215 L250,220 L260,245 L255,270 L240,280 L225,275 L218,260 L215,250 L200,240 Z", label: "GO", cx: 232, cy: 250 },
-  DF: { path: "M248,252 L258,248 L260,258 L250,260 Z", label: "DF", cx: 254, cy: 254 },
-  MS: { path: "M140,225 L165,240 L200,240 L215,250 L218,260 L225,275 L215,300 L190,315 L165,300 L145,275 L135,250 Z", label: "MS", cx: 178, cy: 272 },
-  MG: { path: "M255,270 L260,245 L280,260 L310,260 L335,240 L340,255 L330,280 L310,295 L285,300 L265,295 L255,285 Z", label: "MG", cx: 295, cy: 272 },
-  ES: { path: "M335,240 L350,235 L355,260 L340,270 L330,280 L340,255 Z", label: "ES", cx: 343, cy: 255 },
-  RJ: { path: "M310,295 L330,280 L340,270 L345,280 L330,300 L310,305 Z", label: "RJ", cx: 328, cy: 290 },
-  SP: { path: "M218,260 L225,275 L215,300 L230,315 L255,315 L275,305 L285,300 L265,295 L255,285 L255,270 L240,280 Z", label: "SP", cx: 250, cy: 292 },
-  PR: { path: "M190,315 L215,300 L230,315 L255,315 L260,330 L240,340 L215,340 L195,330 Z", label: "PR", cx: 225, cy: 325 },
-  SC: { path: "M215,340 L240,340 L255,345 L250,360 L230,365 L215,355 Z", label: "SC", cx: 235, cy: 350 },
-  RS: { path: "M195,330 L215,340 L215,355 L230,365 L225,390 L210,400 L190,395 L172,370 L175,345 Z", label: "RS", cx: 200, cy: 368 },
-  RO: { path: "M80,175 L130,185 L130,200 L110,210 L90,215 L75,205 L80,195 Z", label: "RO", cx: 105, cy: 195 },
-};
-
-// Compute heat color from count
-function getStateColor(count: number, maxCount: number): string {
-  if (count === 0) return "#E8ECF0";
-  const intensity = count / maxCount;
-  if (intensity > 0.7) return "#D4A017"; // gold/yellow for high
-  if (intensity > 0.4) return "#F5DEB3"; // wheat for medium
-  return "#FFF8DC"; // cornsilk for low
-}
-
 export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
-  const [selectedUF, setSelectedUF] = useState<string | null>(null);
-  const [hoveredUF, setHoveredUF] = useState<string | null>(null);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -74,31 +32,6 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
     const valorTotal = processos.reduce((s, p) => s + (p.valor_causa || 0), 0);
     return { total, ativos, valorTotal };
   }, [processos]);
-
-  // UF-based data for map
-  const ufData = useMemo(() => {
-    const map: Record<string, { count: number; valor: number; comarcas: Record<string, number> }> = {};
-    processos.forEach(p => {
-      const uf = (p.UF || "").toUpperCase().trim();
-      if (!uf) return;
-      if (!map[uf]) map[uf] = { count: 0, valor: 0, comarcas: {} };
-      map[uf].count++;
-      map[uf].valor += (p.valor_causa || 0);
-      const comarca = (p.comarca || "N/A").toUpperCase();
-      map[uf].comarcas[comarca] = (map[uf].comarcas[comarca] || 0) + 1;
-    });
-    return map;
-  }, [processos]);
-
-  const maxUFCount = useMemo(() => {
-    return Math.max(1, ...Object.values(ufData).map(d => d.count));
-  }, [ufData]);
-
-  const activeUF = selectedUF || hoveredUF;
-  const activeUFData = activeUF ? ufData[activeUF] : null;
-  const activeComarcas = activeUFData
-    ? Object.entries(activeUFData.comarcas).sort((a, b) => b[1] - a[1]).slice(0, 6)
-    : [];
 
   // Comarcas ranking
   const comarcasRanking = useMemo(() => {
@@ -183,7 +116,7 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
   return (
     <div className="space-y-6">
 
-      {/* 1. KPI Cards — 3 cards (sem Arquivados) */}
+      {/* 1. KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="rounded-xl shadow-sm border-2 overflow-hidden">
           <CardContent className="p-5">
@@ -216,7 +149,7 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
         </Card>
       </div>
 
-      {/* 2. Comarcas Ranking + Mapa */}
+      {/* 2. Top Rankings Row (Comarcas & Unidades) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Comarcas com maior volume */}
@@ -252,97 +185,46 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
           </CardContent>
         </Card>
 
-        {/* Mapa de Processos Ativos por UF */}
+        {/* Unidades Organizacionais */}
         <Card className="rounded-xl shadow-sm border-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-bold text-slate-800">Mapa de Processos Ativos por UF</CardTitle>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
+              <Building2 className="h-5 w-5" style={{ color: ROYAL_BLUE }} /> Unidades Organizacionais com mais ações ajuizadas
+            </CardTitle>
           </CardHeader>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-center">
-              {/* SVG Map */}
-              <div className="w-full max-w-[500px] flex items-center justify-center bg-slate-50/50 rounded-lg p-2">
-                <svg 
-                  viewBox="20 30 370 390" 
-                  className="w-full h-auto max-h-[380px]"
-                  style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.08))" }}
+          <CardContent>
+            <div className="h-[380px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart 
+                  data={unidadesData} 
+                  layout="vertical" 
+                  margin={{ top: 5, right: 40, left: 5, bottom: 5 }}
                 >
-                  {Object.entries(BRAZIL_STATES).map(([uf, data]) => {
-                    const count = ufData[uf]?.count || 0;
-                    const isActive = activeUF === uf;
-                    return (
-                      <g key={uf}>
-                        <path
-                          d={data.path}
-                          fill={isActive ? "#D4A017" : getStateColor(count, maxUFCount)}
-                          stroke="#9ca3af"
-                          strokeWidth={isActive ? 1.8 : 0.7}
-                          className="cursor-pointer transition-all duration-200"
-                          onMouseEnter={() => setHoveredUF(uf)}
-                          onMouseLeave={() => setHoveredUF(null)}
-                          onClick={() => setSelectedUF(prev => prev === uf ? null : uf)}
-                        />
-                        {count > 0 && (
-                          <text 
-                            x={data.cx} 
-                            y={data.cy} 
-                            textAnchor="middle" 
-                            dominantBaseline="central" 
-                            className="pointer-events-none select-none"
-                            fill={isActive ? "#000" : "#4a5568"} 
-                            fontSize="8" 
-                            fontWeight="700"
-                          >
-                            {uf}
-                          </text>
-                        )}
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
+                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+                  <YAxis 
+                    type="category" 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fontSize: 10, fill: "#334155", fontWeight: 600 }} 
+                    width={160}
+                  />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={28}>
+                    {unidadesData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={CHART_GRADIENT[index % CHART_GRADIENT.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
+
       </div>
 
-      {/* 3. Unidades Organizacionais (full width) */}
-      <Card className="rounded-xl shadow-sm border-2">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <Building2 className="h-5 w-5" style={{ color: ROYAL_BLUE }} /> Unidades Organizacionais com mais ações ajuizadas
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart 
-                data={unidadesData} 
-                layout="vertical" 
-                margin={{ top: 5, right: 40, left: 5, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-                <YAxis 
-                  type="category" 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: "#334155", fontWeight: 600 }} 
-                  width={160}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={28}>
-                  {unidadesData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={CHART_GRADIENT[index % CHART_GRADIENT.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 4. Processos por Fase + Distribuição por Tipo de Ação */}
+      {/* 3. Processos por Fase + Distribuição por Tipo de Ação */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         <Card className="rounded-xl shadow-sm border-2">
@@ -409,7 +291,7 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
         </Card>
       </div>
 
-      {/* 5. Ranking Advogado Adverso */}
+      {/* 4. Ranking Advogado Adverso */}
       <Card className="rounded-xl shadow-sm border-2">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
