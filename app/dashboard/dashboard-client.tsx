@@ -3,9 +3,10 @@
 import { useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { SidebarNav } from "@/components/dashboard/sidebar-nav"
-import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { Processo, Acordo } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import Image from "next/image"
+import { Menu, Bell, Search } from "lucide-react"
 
 import { AcordosTab } from "@/components/dashboard/tabs/acordos-tab"
 import { ProcessosTab } from "@/components/dashboard/tabs/processos-tab"
@@ -33,6 +34,13 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
     return id;
   }
 
+  const getPageSubtitle = (id: string) => {
+    if (id === "dashboard") return "Panorama executivo do contencioso trabalhista";
+    if (id === "acordos") return "Gestão e acompanhamento dos acordos realizados";
+    if (id === "processos") return "Detalhamento completo dos processos ativos";
+    return "";
+  }
+
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       
@@ -47,34 +55,67 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
       />
 
       <main className={cn(
-        "flex-1 transition-all duration-500 max-w-7xl mx-auto",
-        isCollapsed ? "md:ml-20" : "md:ml-64",
+        "flex-1 transition-all duration-500 ease-out",
+        isCollapsed ? "md:ml-[72px]" : "md:ml-64",
         "ml-0"
       )}>
         
-        <div className="sticky top-0 z-30 flex h-20 w-full items-center justify-between border-b border-border bg-background/90 px-6 backdrop-blur-md">
-          <div className="flex items-center gap-4">
-            <button 
-              className="md:hidden p-2 text-foreground"
-              onClick={() => setIsMobileMenuOpen(true)}
-            >
-              <svg width="24" height="24" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1.5 3C1.22386 3 1 3.22386 1 3.5C1 3.77614 1.22386 4 1.5 4H13.5C13.7761 4 14 3.77614 14 3.5C14 3.22386 13.7761 3 13.5 3H1.5ZM1 7.5C1 7.22386 1.22386 7 1.5 7H13.5C13.7761 7 14 7.22386 14 7.5C14 7.77614 13.7761 8 13.5 8H1.5C1.22386 8 1 7.77614 1 7.5ZM1 11.5C1 11.2239 1.22386 11 1.5 11H13.5C13.7761 11 14 11.2239 14 11.5C14 11.7761 13.7761 12 13.5 12H1.5C1.22386 12 1 11.7761 1 11.5Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"></path>
-              </svg>
-            </button>
-            <h1 className="text-xl font-black tracking-widest uppercase">
-              {getPageTitle(activeNavItem)} // DEXCO
-            </h1>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <div className="h-8 w-8 bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs uppercase cursor-pointer hover:bg-foreground transition-colors">
-              DX
+        {/* Executive Header */}
+        <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+          <div className="flex h-16 items-center justify-between px-6 max-w-[1400px] mx-auto">
+            <div className="flex items-center gap-4">
+              {/* Mobile hamburger */}
+              <button 
+                className="md:hidden p-2 rounded-lg hover:bg-muted text-foreground transition-colors"
+                onClick={() => setIsMobileMenuOpen(true)}
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+
+              {/* Breadcrumb style navigation */}
+              <div className="flex items-center gap-2">
+                <Image
+                  src="/dexco-logo.svg"
+                  alt="Dexco"
+                  width={80}
+                  height={24}
+                  className="h-5 w-auto opacity-70"
+                />
+                <span className="text-muted-foreground/40 text-sm">/</span>
+                <span className="text-sm font-semibold text-foreground">
+                  {getPageTitle(activeNavItem)}
+                </span>
+              </div>
             </div>
+            
+            <div className="flex items-center gap-2">
+              {/* Search trigger */}
+              <button className="h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+                <Search className="h-4 w-4" />
+              </button>
+              {/* Notifications */}
+              <button className="h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors relative">
+                <Bell className="h-4 w-4" />
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-primary rounded-full pulse-dot" />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Page Title Banner */}
+        <div className="border-b border-border/40 bg-gradient-to-r from-background via-background to-muted/30">
+          <div className="max-w-[1400px] mx-auto px-6 py-6">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              {getPageTitle(activeNavItem)}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {getPageSubtitle(activeNavItem)}
+            </p>
           </div>
         </div>
 
-        <div className="p-6 md:p-10 space-y-8 animate-in fade-in duration-500">
+        {/* Content */}
+        <div className="max-w-[1400px] mx-auto p-6 md:p-8 animate-slide-up">
           
           {activeNavItem === "dashboard" && (
             <VisaoGeralTab processos={processos} />
@@ -89,6 +130,14 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
           )}
 
         </div>
+
+        {/* Footer */}
+        <footer className="border-t border-border/40 py-4 px-6">
+          <div className="max-w-[1400px] mx-auto flex items-center justify-between text-[10px] text-muted-foreground/50">
+            <span>© {new Date().getFullYear()} Dexco S.A. — Powered by Martinelli Advogados</span>
+            <span className="hidden sm:inline">Gestão de Contencioso Trabalhista</span>
+          </div>
+        </footer>
 
       </main>
     </div>

@@ -5,13 +5,13 @@ import { Processo } from "@/lib/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
-import { Scale, Activity, DollarSign, Building2 } from "lucide-react"
+import { Scale, Activity, DollarSign, Building2, TrendingUp, ArrowUpRight } from "lucide-react"
 
 interface VisaoGeralTabProps {
   processos: Processo[];
 }
 
-// Azul Royal palette shades
+// Azul Royal palette
 const ROYAL_BLUE = "#0F2A60";
 const ROYAL_BLUE_LIGHT = "#1A3F80";
 const ROYAL_BLUE_MEDIUM = "#2558A8";
@@ -28,12 +28,11 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
 
   const stats = useMemo(() => {
     const total = processos.length;
-    const ativos = total; // all are active unless status says otherwise
+    const ativos = total;
     const valorTotal = processos.reduce((s, p) => s + (p.valor_causa || 0), 0);
     return { total, ativos, valorTotal };
   }, [processos]);
 
-  // Comarcas ranking
   const comarcasRanking = useMemo(() => {
     const map: Record<string, number> = {};
     processos.forEach(p => {
@@ -48,7 +47,6 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
 
   const maxComarca = comarcasRanking[0]?.value || 1;
 
-  // Processos Ativos por Fase
   const faseData = useMemo(() => {
     const map: Record<string, number> = {};
     processos.forEach(p => {
@@ -60,7 +58,6 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
       .map(([name, value]) => ({ name, value }));
   }, [processos]);
 
-  // Distribuição por Tipo de Ação
   const tipoAcaoData = useMemo(() => {
     const map: Record<string, number> = {};
     processos.forEach(p => {
@@ -72,7 +69,6 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
       .map(([name, value]) => ({ name, value }));
   }, [processos]);
 
-  // Ranking Advogado Adverso
   const advogadoData = useMemo(() => {
     const map: Record<string, number> = {};
     processos.forEach(p => {
@@ -87,7 +83,6 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
       .map(([name, value]) => ({ name, value }));
   }, [processos]);
 
-  // Unidades Organizacionais
   const unidadesData = useMemo(() => {
     const map: Record<string, number> = {};
     processos.forEach(p => {
@@ -100,13 +95,12 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
       .map(([name, value]) => ({ name, value }));
   }, [processos]);
 
-  // Custom tooltip for charts
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white shadow-lg border border-slate-200 rounded-lg px-4 py-3 text-sm">
-          <p className="font-bold text-slate-800 mb-1">{label || payload[0]?.payload?.name}</p>
-          <p className="text-slate-600">{payload[0]?.value} processo(s)</p>
+        <div className="bg-white shadow-xl border border-border rounded-xl px-4 py-3 text-sm">
+          <p className="font-semibold text-foreground mb-0.5">{label || payload[0]?.payload?.name}</p>
+          <p className="text-muted-foreground text-xs">{payload[0]?.value} processo(s)</p>
         </div>
       );
     }
@@ -116,102 +110,115 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
   return (
     <div className="space-y-6">
 
-      {/* 1. KPI Cards */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="rounded-xl shadow-sm border-2 overflow-hidden">
+        
+        {/* Total de Processos */}
+        <Card className="glass-card rounded-xl overflow-hidden group hover:shadow-lg transition-all duration-300">
           <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-500">Total de Processos</h3>
-              <Scale className="h-4 w-4 text-slate-400" />
+            <div className="flex items-start justify-between mb-4">
+              <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${ROYAL_BLUE}10` }}>
+                <Scale className="h-5 w-5" style={{ color: ROYAL_BLUE }} />
+              </div>
+              <Badge variant="outline" className="text-[9px] font-semibold px-2 py-0.5 rounded-full border-border text-muted-foreground">
+                Todos
+              </Badge>
             </div>
-            <p className="text-3xl font-black text-slate-900">{stats.total}</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Total de Processos</p>
+            <div className="flex items-end gap-2">
+              <p className="text-3xl font-bold text-foreground tabular-nums">{stats.total}</p>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl shadow-sm border-2 overflow-hidden">
+        {/* Processos Ativos */}
+        <Card className="overflow-hidden group hover:shadow-lg transition-all duration-300 rounded-xl border-0" style={{ background: `linear-gradient(135deg, ${ROYAL_BLUE} 0%, #1a3f80 100%)` }}>
           <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-500">Processos Ativos</h3>
-              <Activity className="h-4 w-4" style={{ color: ROYAL_BLUE }} />
+            <div className="flex items-start justify-between mb-4">
+              <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
+                <Activity className="h-5 w-5 text-white" />
+              </div>
+              <div className="flex items-center gap-1 bg-white/10 rounded-full px-2 py-0.5">
+                <TrendingUp className="h-3 w-3 text-emerald-300" />
+                <span className="text-[9px] font-semibold text-emerald-300">Ativos</span>
+              </div>
             </div>
-            <p className="text-3xl font-black" style={{ color: ROYAL_BLUE }}>{stats.ativos}</p>
+            <p className="text-[11px] font-medium text-white/60 uppercase tracking-wider mb-1">Processos Ativos</p>
+            <p className="text-3xl font-bold text-white tabular-nums">{stats.ativos}</p>
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl shadow-sm border-2 overflow-hidden">
+        {/* Valor Total */}
+        <Card className="glass-card rounded-xl overflow-hidden group hover:shadow-lg transition-all duration-300">
           <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-500">Valor Total das Causas</h3>
-              <DollarSign className="h-4 w-4 text-emerald-500" />
+            <div className="flex items-start justify-between mb-4">
+              <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-emerald-600" />
+              </div>
+              <div className="flex items-center gap-1">
+                <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
+              </div>
             </div>
-            <p className="text-xl font-black text-slate-900 leading-tight">{formatCurrency(stats.valorTotal)}</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Valor Total das Causas</p>
+            <p className="text-xl font-bold text-foreground tabular-nums leading-tight">{formatCurrency(stats.valorTotal)}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* 2. Top Rankings Row (Comarcas & Unidades) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Rankings Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         
-        {/* Comarcas com maior volume */}
-        <Card className="rounded-xl shadow-sm border-2">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <span className="text-lg">📍</span> Comarcas com maior volume de ajuizamento
+        {/* Comarcas Ranking */}
+        <Card className="rounded-xl shadow-sm border border-border/60 bg-card">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2.5">
+              <span className="h-5 w-5 rounded-md flex items-center justify-center text-xs" style={{ backgroundColor: `${ROYAL_BLUE}12` }}>📍</span>
+              Comarcas com maior volume
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-1.5 pt-0">
             {comarcasRanking.map((c) => (
-              <div key={c.name} className="flex items-center gap-3 py-2 border border-slate-100 rounded-lg px-3 hover:bg-slate-50 transition-colors">
-                <span className="text-xs font-black text-slate-400 w-5 text-right">{c.rank}º</span>
-                <span className="text-xs font-bold text-slate-700 uppercase flex-shrink-0 min-w-[100px]">
-                  {c.name} <span className="text-[10px] text-slate-400">↗</span>
+              <div key={c.name} className="flex items-center gap-3 py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors group cursor-default">
+                <span className="text-[10px] font-bold text-muted-foreground/60 w-5 text-right tabular-nums">{c.rank}º</span>
+                <span className="text-[11px] font-semibold text-foreground/80 uppercase flex-shrink-0 min-w-[100px] group-hover:text-foreground transition-colors">
+                  {c.name}
                 </span>
-                <div className="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden">
+                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                   <div 
-                    className="h-full rounded-full transition-all duration-700"
+                    className="h-full rounded-full transition-all duration-700 ease-out"
                     style={{ 
                       width: `${(c.value / maxComarca) * 100}%`, 
-                      backgroundColor: ROYAL_BLUE,
-                      opacity: 1 - (c.rank - 1) * 0.07
+                      background: `linear-gradient(90deg, ${ROYAL_BLUE} 0%, ${ROYAL_BLUE_SOFT} 100%)`,
+                      opacity: 1 - (c.rank - 1) * 0.06
                     }} 
                   />
                 </div>
-                <span className="text-sm font-black text-slate-700 w-6 text-right">{c.value}</span>
+                <span className="text-xs font-bold text-foreground tabular-nums w-8 text-right">{c.value}</span>
               </div>
             ))}
             {comarcasRanking.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground py-4">Sem dados de comarcas.</p>
+              <p className="text-center text-xs text-muted-foreground py-6">Sem dados de comarcas.</p>
             )}
           </CardContent>
         </Card>
 
         {/* Unidades Organizacionais */}
-        <Card className="rounded-xl shadow-sm border-2">
+        <Card className="rounded-xl shadow-sm border border-border/60 bg-card">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
-              <Building2 className="h-5 w-5" style={{ color: ROYAL_BLUE }} /> Unidades Organizacionais com mais ações ajuizadas
+            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2.5">
+              <Building2 className="h-4 w-4" style={{ color: ROYAL_BLUE }} />
+              Unidades com mais ações ajuizadas
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[380px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart 
-                  data={unidadesData} 
-                  layout="vertical" 
-                  margin={{ top: 5, right: 40, left: 5, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-                  <YAxis 
-                    type="category" 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fontSize: 10, fill: "#334155", fontWeight: 600 }} 
-                    width={160}
-                  />
+                <BarChart data={unidadesData} layout="vertical" margin={{ top: 5, right: 40, left: 5, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(var(--foreground))", fontWeight: 500 }} width={150} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={28}>
+                  <Bar dataKey="value" radius={[0, 6, 6, 0]} maxBarSize={24}>
                     {unidadesData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={CHART_GRADIENT[index % CHART_GRADIENT.length]} />
                     ))}
@@ -221,35 +228,28 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
             </div>
           </CardContent>
         </Card>
-
       </div>
 
-      {/* 3. Processos por Fase + Distribuição por Tipo de Ação */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         
-        <Card className="rounded-xl shadow-sm border-2">
+        {/* Fase */}
+        <Card className="rounded-xl shadow-sm border border-border/60 bg-card">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
+            <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
               Processos Ativos por Fase
-              <Badge variant="outline" className="text-[10px] font-bold px-2 py-0 border-slate-300 text-slate-500 ml-1">Total</Badge>
+              <Badge variant="secondary" className="text-[9px] font-semibold px-2 py-0 rounded-full">Total</Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[220px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={faseData} layout="vertical" margin={{ top: 5, right: 40, left: 5, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-                  <YAxis 
-                    type="category" 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fontSize: 10, fill: "#334155", fontWeight: 700 }} 
-                    width={120}
-                  />
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(var(--foreground))", fontWeight: 600 }} width={120} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="value" radius={[0, 8, 8, 0]} maxBarSize={26}>
+                  <Bar dataKey="value" radius={[0, 8, 8, 0]} maxBarSize={22}>
                     {faseData.map((_, index) => (
                       <Cell key={`fase-${index}`} fill={CHART_GRADIENT[index % CHART_GRADIENT.length]} />
                     ))}
@@ -260,26 +260,20 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl shadow-sm border-2">
+        {/* Tipo de Ação */}
+        <Card className="rounded-xl shadow-sm border border-border/60 bg-card">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-bold text-slate-800">Distribuição por Tipo de Ação</CardTitle>
+            <CardTitle className="text-sm font-semibold text-foreground">Distribuição por Tipo de Ação</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[220px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={tipoAcaoData} layout="vertical" margin={{ top: 5, right: 40, left: 5, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-                  <YAxis 
-                    type="category" 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fontSize: 10, fill: "#334155", fontWeight: 600 }} 
-                    width={150}
-                  />
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                  <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(var(--foreground))", fontWeight: 500 }} width={150} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="value" radius={[0, 8, 8, 0]} maxBarSize={26}>
+                  <Bar dataKey="value" radius={[0, 8, 8, 0]} maxBarSize={22}>
                     {tipoAcaoData.map((_, index) => (
                       <Cell key={`tipo-${index}`} fill={index === 0 ? ROYAL_BLUE : CHART_GRADIENT[Math.min(index + 1, CHART_GRADIENT.length - 1)]} />
                     ))}
@@ -291,30 +285,23 @@ export function VisaoGeralTab({ processos }: VisaoGeralTabProps) {
         </Card>
       </div>
 
-      {/* 4. Ranking Advogado Adverso */}
-      <Card className="rounded-xl shadow-sm border-2">
+      {/* Ranking Advogado */}
+      <Card className="rounded-xl shadow-sm border border-border/60 bg-card">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
+          <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
             Ranking Advogado Adverso
-            <Badge variant="outline" className="text-[10px] font-bold px-2 py-0 border-slate-300 text-slate-500 ml-1">Total</Badge>
+            <Badge variant="secondary" className="text-[9px] font-semibold px-2 py-0 rounded-full">Total</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={advogadoData} layout="vertical" margin={{ top: 5, right: 40, left: 5, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e2e8f0" />
-                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: "#64748b" }} />
-                <YAxis 
-                  type="category" 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fontSize: 10, fill: "#334155", fontWeight: 600 }} 
-                  width={180}
-                />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" strokeOpacity={0.5} />
+                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                <YAxis type="category" dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "hsl(var(--foreground))", fontWeight: 500 }} width={180} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="value" radius={[0, 8, 8, 0]} maxBarSize={24}>
+                <Bar dataKey="value" radius={[0, 8, 8, 0]} maxBarSize={20}>
                   {advogadoData.map((_, index) => (
                     <Cell key={`adv-${index}`} fill={CHART_GRADIENT[index % CHART_GRADIENT.length]} />
                   ))}
