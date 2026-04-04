@@ -53,36 +53,14 @@ export default function LoginPage() {
         <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full" style={{ background: "radial-gradient(circle, rgba(59,125,216,0.15) 0%, transparent 70%)" }} />
         <div className="absolute -bottom-60 -left-20 w-[400px] h-[400px] rounded-full" style={{ background: "radial-gradient(circle, rgba(59,125,216,0.1) 0%, transparent 70%)" }} />
 
-        <div className="relative z-10">
+        <div className="relative z-10 flex-1 flex flex-col justify-center items-center">
           <Image
             src="/martinelli-logo.svg"
             alt="Martinelli Advogados"
-            width={200}
-            height={36}
-            className="h-8 w-auto opacity-90"
+            width={300}
+            height={50}
+            className="w-48 h-auto opacity-90"
           />
-        </div>
-
-        <div className="relative z-10 space-y-6">
-          <div className="space-y-2">
-            <p className="text-white/40 text-xs font-medium uppercase tracking-[0.2em]">Plataforma de Gestão</p>
-            <h1 className="text-5xl xl:text-6xl font-bold leading-[1.05] tracking-tight">
-              Contencioso<br />
-              Trabalhista
-            </h1>
-          </div>
-          <p className="max-w-md text-base text-white/50 font-light leading-relaxed">
-            Inteligência de dados aplicada à gestão processual. Análise de risco, acordos e acompanhamento completo do contencioso.
-          </p>
-          <div className="flex items-center gap-3 pt-4">
-            <div className="h-px flex-1 bg-white/10" />
-            <span className="text-[10px] text-white/25 uppercase tracking-widest font-medium">Powered by Martinelli</span>
-            <div className="h-px flex-1 bg-white/10" />
-          </div>
-        </div>
-
-        <div className="relative z-10 text-[10px] text-white/20">
-          v2026 — Sistema restrito
         </div>
       </div>
 
@@ -92,13 +70,16 @@ export default function LoginPage() {
           
           {/* Dexco Logo */}
           <div className="space-y-6">
-            <Image
-              src="/dexco-logo.svg"
-              alt="Dexco"
-              width={120}
-              height={36}
-              className="h-8 w-auto"
-            />
+            <div className="flex items-center justify-start h-20 -ml-10">
+              <Image
+                src="/dexco-logo.svg"
+                alt="Dexco"
+                width={300}
+                height={300}
+                className="w-48 h-auto scale-[1.5]"
+                priority
+              />
+            </div>
             <div>
               <h2 className="text-2xl font-bold text-foreground tracking-tight">Bem-vindo de volta</h2>
               <p className="text-sm text-muted-foreground mt-1">Acesse sua conta para continuar</p>
