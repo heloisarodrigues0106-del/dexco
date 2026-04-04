@@ -53,15 +53,7 @@ export default function LoginPage() {
         <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full" style={{ background: "radial-gradient(circle, rgba(59,125,216,0.15) 0%, transparent 70%)" }} />
         <div className="absolute -bottom-60 -left-20 w-[400px] h-[400px] rounded-full" style={{ background: "radial-gradient(circle, rgba(59,125,216,0.1) 0%, transparent 70%)" }} />
 
-        <div className="relative z-10 flex-1 flex flex-col justify-center items-center">
-          <Image
-            src="/martinelli-logo.svg"
-            alt="Martinelli Advogados"
-            width={300}
-            height={50}
-            className="w-48 h-auto opacity-90"
-          />
-        </div>
+        {/* Left panel is left completely blank with only background textures per user request */}
       </div>
 
       {/* Right Panel — Login Form */}
@@ -69,8 +61,8 @@ export default function LoginPage() {
         <div className="w-full max-w-sm mx-auto space-y-10">
           
           {/* Dexco Logo */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-start h-20 -ml-10">
+          <div className="space-y-6 flex flex-col items-center text-center">
+            <div className="flex items-center justify-center h-24">
               <Image
                 src="/dexco-logo.svg"
                 alt="Dexco"
@@ -80,9 +72,9 @@ export default function LoginPage() {
                 priority
               />
             </div>
-            <div>
+            <div className="space-y-1">
               <h2 className="text-2xl font-bold text-foreground tracking-tight">Bem-vindo de volta</h2>
-              <p className="text-sm text-muted-foreground mt-1">Acesse sua conta para continuar</p>
+              <p className="text-sm text-muted-foreground">Acesse sua conta para continuar</p>
             </div>
           </div>
 
