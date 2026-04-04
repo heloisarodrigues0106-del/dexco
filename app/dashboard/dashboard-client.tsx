@@ -63,32 +63,40 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
         {/* Executive Header */}
         <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl">
           <div className="flex h-16 items-center justify-between px-6 max-w-[1400px] mx-auto">
-            <div className="flex items-center gap-4">
+            
+            {/* Left: Mobile Menu & Breadcrumb */}
+            <div className="flex items-center gap-4 w-1/3">
               {/* Mobile hamburger */}
               <button 
-                className="md:hidden p-2 rounded-lg hover:bg-muted text-foreground transition-colors"
+                className="md:hidden p-2 -ml-2 rounded-lg hover:bg-muted text-foreground transition-colors"
                 onClick={() => setIsMobileMenuOpen(true)}
               >
                 <Menu className="h-5 w-5" />
               </button>
 
-              {/* Breadcrumb style navigation */}
-              <div className="flex items-center gap-2">
-                <Image
-                  src="/dexco-logo.svg"
-                  alt="Dexco"
-                  width={80}
-                  height={24}
-                  className="h-5 w-auto opacity-70"
-                />
-                <span className="text-muted-foreground/40 text-sm">/</span>
+              {/* Page Title */}
+              <div className="hidden md:flex items-center gap-2">
                 <span className="text-sm font-semibold text-foreground">
                   {getPageTitle(activeNavItem)}
                 </span>
+                <span className="text-muted-foreground/40 text-sm">/</span>
+                <span className="text-xs text-muted-foreground">Painel Administrativo</span>
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
+            {/* Center: Logo */}
+            <div className="flex items-center justify-center w-1/3">
+              <Image
+                src="/dexco-logo.svg"
+                alt="Dexco"
+                width={90}
+                height={26}
+                className="h-6 w-auto opacity-75"
+              />
+            </div>
+
+            {/* Right: Actions */}
+            <div className="flex items-center justify-end gap-2 w-1/3">
               {/* Search trigger */}
               <button className="h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
                 <Search className="h-4 w-4" />
