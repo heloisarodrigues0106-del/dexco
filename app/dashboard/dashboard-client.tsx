@@ -79,8 +79,6 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
                 <span className="text-sm font-semibold text-foreground">
                   {getPageTitle(activeNavItem)}
                 </span>
-                <span className="text-muted-foreground/40 text-sm">/</span>
-                <span className="text-xs text-muted-foreground">Painel Administrativo</span>
               </div>
             </div>
             
@@ -89,9 +87,9 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
               <Image
                 src="/dexco-logo.svg"
                 alt="Dexco"
-                width={90}
-                height={26}
-                className="h-6 w-auto opacity-75"
+                width={120}
+                height={120}
+                className="h-12 w-auto opacity-80"
               />
             </div>
 
