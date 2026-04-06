@@ -11,6 +11,7 @@ import { Menu, Bell, Search } from "lucide-react"
 import { AcordosTab } from "@/components/dashboard/tabs/acordos-tab"
 import { ProcessosTab } from "@/components/dashboard/tabs/processos-tab"
 import { VisaoGeralTab } from "@/components/dashboard/tabs/visao-geral-tab"
+import { ConfiguracoesTab } from "@/components/dashboard/tabs/configuracoes-tab"
 import { createClient } from "@/lib/supabase-client"
 
 interface DashboardClientProps {
@@ -131,6 +132,10 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
 
           {activeNavItem === "processos" && (
             <ProcessosTab processos={processos} />
+          )}
+
+          {activeNavItem === "configuracoes" && (
+            <ConfiguracoesTab />
           )}
 
         </div>
