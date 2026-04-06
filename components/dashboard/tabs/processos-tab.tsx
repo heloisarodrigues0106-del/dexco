@@ -5,8 +5,9 @@ import { Processo } from "@/lib/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ChevronLeft, ChevronRight, Eye, Scale, MapPin, Briefcase, Landmark, User, DollarSign, Activity } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight, Eye, Scale, MapPin, Briefcase, Landmark, User, DollarSign, Activity } from "lucide-react"
 
 interface ProcessosTabProps {
   processos: Processo[];
@@ -16,13 +17,24 @@ export function ProcessosTab({ processos }: ProcessosTabProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
   const [selectedProcesso, setSelectedProcesso] = useState<Processo | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const totalPages = Math.max(1, Math.ceil(processos.length / itemsPerPage));
+  const filteredProcessos = useMemo(() => {
+    return processos.filter(p => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        p.numero_processo?.toLowerCase().includes(searchLower) ||
+        p.nome_reclamante?.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [processos, searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProcessos.length / itemsPerPage));
 
   const currentProcessos = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return processos.slice(startIndex, startIndex + itemsPerPage);
-  }, [processos, currentPage]);
+    return filteredProcessos.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredProcessos, currentPage]);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(p => p + 1);
@@ -63,9 +75,25 @@ export function ProcessosTab({ processos }: ProcessosTabProps) {
     <div className="space-y-6">
       <Card className="rounded-xl shadow-sm border-2 overflow-hidden">
         <CardHeader className="border-b bg-slate-50/50 pb-4">
-          <CardTitle className="text-xl font-bold text-slate-800">
-            Detalhamento dos Processos
-          </CardTitle>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-xl font-bold text-slate-800">
+                Detalhamento dos Processos
+              </CardTitle>
+            </div>
+            <div className="relative w-full md:w-[300px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Buscar processo ou reclamante..." 
+                className="pl-9"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1); // Volta para a primeira página ao pesquisar
+                }}
+              />
+            </div>
+          </div>
         </CardHeader>
         <div className="overflow-x-auto p-0">
           <table className="w-full min-w-[800px] text-sm text-left">
@@ -129,7 +157,7 @@ export function ProcessosTab({ processos }: ProcessosTabProps) {
         {totalPages > 0 && (
           <div className="border-t border-border p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-slate-500 font-medium">
-              {(currentPage - 1) * itemsPerPage + 1}-{Math.min(currentPage * itemsPerPage, processos.length)} de {processos.length}
+              {filteredProcessos.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-{Math.min(currentPage * itemsPerPage, filteredProcessos.length)} de {filteredProcessos.length}
             </p>
             <div className="flex items-center gap-1.5 overflow-x-auto">
               <Button 
