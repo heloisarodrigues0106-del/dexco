@@ -2,13 +2,13 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Dashboard CAT',
-    short_name: 'Dashboard CAT',
-    description: 'Painel executivo para gestão de processos trabalhistas e análise de risco jurídico',
+    name: 'Dashboard DEXCO',
+    short_name: 'Dashboard DEXCO',
+    description: 'Painel executivo para gestão de processos trabalhistas e análise de risco (DEXCO)',
     start_url: '/',
     display: 'standalone',
-    background_color: '#111111',
-    theme_color: '#F6D000',
+    background_color: '#ffffff',
+    theme_color: '#0033A0',
     orientation: 'portrait-primary',
     icons: [
       {
