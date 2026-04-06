@@ -13,6 +13,10 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'Dashboard DEXCO',
   },
+  icons: {
+    icon: '/apple-icon.svg',
+    apple: '/apple-icon.svg',
+  },
 }
 
 export const viewport: Viewport = {
