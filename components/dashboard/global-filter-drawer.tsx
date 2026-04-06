@@ -98,7 +98,7 @@ export function GlobalFilterDrawer({
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto" side="right">
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto px-6 py-6" side="right">
         <SheetHeader className="pb-6 border-b border-border/40 mb-6">
           <SheetTitle className="text-2xl font-bold flex items-center gap-2">
             Filtros
