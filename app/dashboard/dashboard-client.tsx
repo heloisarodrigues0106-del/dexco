@@ -68,7 +68,7 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
         <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl">
           <div className="flex h-16 items-center justify-between px-6 max-w-[1400px] mx-auto">
             
-            {/* Left: Mobile Menu & Breadcrumb */}
+            {/* Left: Mobile Menu */}
             <div className="flex items-center gap-4 w-1/3">
               {/* Mobile hamburger */}
               <button 
@@ -77,13 +77,6 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
               >
                 <Menu className="h-5 w-5" />
               </button>
-
-              {/* Page Title */}
-              <div className="hidden md:flex items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">
-                  {getPageTitle(activeNavItem)}
-                </span>
-              </div>
             </div>
             
             {/* Center: Logo */}
