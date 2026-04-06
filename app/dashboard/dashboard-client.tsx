@@ -145,15 +145,7 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
                   <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-primary rounded-full pulse-dot" />
                 )}
               </button>
-              {/* Search trigger */}
-              <button className="h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
-                <Search className="h-4 w-4" />
-              </button>
-              {/* Notifications */}
-              <button className="h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors relative">
-                <Bell className="h-4 w-4" />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-primary rounded-full pulse-dot" />
-              </button>
+
             </div>
           </div>
         </header>
