@@ -1,17 +1,18 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { SidebarNav } from "@/components/dashboard/sidebar-nav"
 import { Processo, Acordo } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
-import { Menu, Bell, Search } from "lucide-react"
+import { Menu, Bell, Search, Filter } from "lucide-react"
 
 import { AcordosTab } from "@/components/dashboard/tabs/acordos-tab"
 import { ProcessosTab } from "@/components/dashboard/tabs/processos-tab"
 import { VisaoGeralTab } from "@/components/dashboard/tabs/visao-geral-tab"
 import { ConfiguracoesTab } from "@/components/dashboard/tabs/configuracoes-tab"
+import { GlobalFilterDrawer, FilterState } from "@/components/dashboard/global-filter-drawer"
 import { createClient } from "@/lib/supabase-client"
 
 interface DashboardClientProps {
@@ -24,6 +25,39 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
   const [activeNavItem, setActiveNavItem] = useState("dashboard")
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  
+  const [filters, setFilters] = useState<FilterState>({
+    unidadeOrganizacional: "all",
+    advogadoAdverso: "all",
+    tipoAcao: "all",
+    varaComarca: "all",
+  })
+
+  const filteredProcessos = useMemo(() => {
+    return processos.filter(p => {
+      if (filters.unidadeOrganizacional !== "all" && p.unidade_organizacional !== filters.unidadeOrganizacional) return false;
+      if (filters.advogadoAdverso !== "all" && p.advogado_reclamante !== filters.advogadoAdverso) return false;
+      if (filters.tipoAcao !== "all" && p.tipo_acao !== filters.tipoAcao) return false;
+      
+      if (filters.varaComarca !== "all") {
+        const vc = `${p.comarca || ""} - ${p.vara || ""}`.replace(/^- |- $/g, '').trim()
+        if (vc !== filters.varaComarca) return false;
+      }
+      return true;
+    });
+  }, [processos, filters]);
+
+  const filteredAcordos = useMemo(() => {
+    // If no filters are active, return all
+    if (filters.unidadeOrganizacional === "all" && filters.advogadoAdverso === "all" && 
+        filters.tipoAcao === "all" && filters.varaComarca === "all") {
+      return acordos;
+    }
+    // Only map acordos that relate to the filtered processos
+    const validProcessNumbers = new Set(filteredProcessos.map(p => p.numero_processo));
+    return acordos.filter(a => validProcessNumbers.has(a.numero_processo));
+  }, [acordos, filteredProcessos, filters]);
 
   const handleLogout = useCallback(async () => {
     const supabase = createClient()
@@ -48,6 +82,13 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
+      <GlobalFilterDrawer 
+        isOpen={isFilterOpen}
+        onOpenChange={setIsFilterOpen}
+        processos={processos}
+        currentFilters={filters}
+        onApplyFilters={setFilters}
+      />
       
       <SidebarNav 
         activeItem={activeNavItem} 
@@ -94,6 +135,16 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
 
             {/* Right: Actions */}
             <div className="flex items-center justify-end gap-2 w-1/3">
+              {/* Filter drawer trigger */}
+              <button 
+                className="h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors relative"
+                onClick={() => setIsFilterOpen(true)}
+              >
+                <Filter className="h-4 w-4" />
+                {Object.values(filters).some(v => v !== "all") && (
+                  <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-primary rounded-full pulse-dot" />
+                )}
+              </button>
               {/* Search trigger */}
               <button className="h-9 w-9 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
                 <Search className="h-4 w-4" />
@@ -111,15 +162,15 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
         <div className="max-w-[1400px] mx-auto p-6 md:p-8 animate-slide-up">
           
           {activeNavItem === "dashboard" && (
-            <VisaoGeralTab processos={processos} />
+            <VisaoGeralTab processos={filteredProcessos} />
           )}
 
           {activeNavItem === "acordos" && (
-            <AcordosTab acordos={acordos} />
+            <AcordosTab acordos={filteredAcordos} />
           )}
 
           {activeNavItem === "processos" && (
-            <ProcessosTab processos={processos} />
+            <ProcessosTab processos={filteredProcessos} />
           )}
 
           {activeNavItem === "configuracoes" && (
