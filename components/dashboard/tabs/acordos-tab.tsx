@@ -261,7 +261,7 @@ export function AcordosTab({ acordos }: AcordosTabProps) {
           </div>
         </CardHeader>
         <div className="overflow-x-auto p-0">
-          <table className="w-full text-sm text-left">
+          <table className="w-full min-w-[800px] text-sm text-left">
             <thead className="text-xs font-bold uppercase bg-slate-50 border-b border-border text-slate-500">
               <tr>
                 <th className="px-6 py-4">Processo</th>

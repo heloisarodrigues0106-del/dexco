@@ -68,7 +68,7 @@ export function ProcessosTab({ processos }: ProcessosTabProps) {
           </CardTitle>
         </CardHeader>
         <div className="overflow-x-auto p-0">
-          <table className="w-full text-sm text-left">
+          <table className="w-full min-w-[800px] text-sm text-left">
             <thead className="bg-slate-50 border-b border-border">
               <tr>
                 <th className="px-6 py-4 font-bold text-slate-800 text-xs uppercase tracking-wider">Número do Processo</th>
