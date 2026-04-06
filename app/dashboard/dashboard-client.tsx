@@ -107,18 +107,6 @@ export default function DashboardClient({ processos, acordos }: DashboardClientP
           </div>
         </header>
 
-        {/* Page Title Banner */}
-        <div className="border-b border-border/40 bg-gradient-to-r from-background via-background to-muted/30">
-          <div className="max-w-[1400px] mx-auto px-6 py-6">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {getPageTitle(activeNavItem)}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {getPageSubtitle(activeNavItem)}
-            </p>
-          </div>
-        </div>
-
         {/* Content */}
         <div className="max-w-[1400px] mx-auto p-6 md:p-8 animate-slide-up">
           
