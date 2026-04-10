@@ -73,6 +73,22 @@ export const mockProcessos: Processo[] = [
   }
 ];
 
+export const pedidosComparativos = [
+  { tipo: "Horas Extras", inicial: 120, sentenca: 85 },
+  { tipo: "Danos Morais", inicial: 95, sentenca: 42 },
+  { tipo: "Insalubridade", inicial: 78, sentenca: 55 },
+  { tipo: "FGTS", inicial: 65, sentenca: 60 },
+  { tipo: "Vínculo", inicial: 45, sentenca: 20 },
+]
+
+export const topPedidos = [
+  { tipo: "Horas Extras", total: 120, percentual: 100 },
+  { tipo: "Danos Morais", total: 95, percentual: 79 },
+  { tipo: "Insalubridade", total: 78, percentual: 65 },
+  { tipo: "FGTS", total: 65, percentual: 54 },
+  { tipo: "Vínculo Empregatício", total: 45, percentual: 38 },
+]
+
 export const mockAcordos: Acordo[] = [
   {
     numero_processo: "0009876-54.2023.5.02.0012",
