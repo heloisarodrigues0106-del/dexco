@@ -1,8 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import fs from 'fs'
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 

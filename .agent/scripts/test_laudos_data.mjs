@@ -1,15 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
-
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+import * as dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
 import fs from 'fs';
-const supabaseUrl = "https://dcqpzzdtpdjvcjcobgbs.supabase.co";
-const supabaseServiceKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjcXB6emR0cGRqdmNqY29iZ2JzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzMzNjk3NSwiZXhwIjoyMDg4OTEyOTc1fQ.gRkY-2JZAn14CkB2IG2_iKT2akwSeyCVLOJ1IgmLfgY";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: resolve(__dirname, '../../.env.local') });
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('Variáveis NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY não encontradas no .env.local');
+    process.exit(1);
+}
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function run() {
     const { data } = await supabase.from('tb_laudo').select('*').limit(5);
-    fs.writeFileSync('c:\\v0-dashboard-cat\\.agent\\scripts\\laudos.json', JSON.stringify(data, null, 2));
+    fs.writeFileSync(resolve(__dirname, 'laudos.json'), JSON.stringify(data, null, 2));
 }
 
 run();
